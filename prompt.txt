@@ -9,7 +9,7 @@ Give this entire document to your AI coding agent (Claude, GPT-4, Cursor, etc.).
 The agent must follow sections in order — each section builds on the previous.
 Green AGENT INSTRUCTION boxes are direct commands the agent must follow exactly.
 API keys listed in Section 1 will be provided by the owner separately.
-NEW: Admin panel is LOCKED to developer email only (sunlight0026@gmail.com).
+NEW: Admin panel is LOCKED to developer email only (ganeshsharna7114@gmail.com).
 NEW: Subject-based folder system for educational content organization.
 
 SECTIONS IN THIS DOCUMENT
@@ -31,14 +31,14 @@ SECTION 02
 Project Overview
 Build a complete full-stack educational marketplace called Nightmare. Students browse, preview, and purchase educational PDF documents organized by class and subject. The platform also offers aesthetic wallpaper images (4K, HD). The platform handles both free and paid content. Paid content unlocks only after verified Razorpay payment. An admin panel lets the developer manage all content, orders, and users.
 Core Requirements — Non-Negotiable
-Admin access is LOCKED to developer email (sunlight0026@gmail.com) — no other user can access /admin
+Admin access is LOCKED to developer email (ganeshsharna7114@gmail.com) — no other user can access /admin
 Admin can add, edit, delete any product AFTER the website is live — no code changes needed
 Admin can create subject folders within each category (Class)
 PDFs are organized: Category (Class) > Subject > Individual PDFs
 Admin can toggle any product between Free and Paid at any time
 Paid downloads require successful Razorpay payment before generating download link
 Free downloads require no payment — direct one-click download
-All user feedback and contact form submissions are emailed to sunlight0026@gmail.com
+All user feedback and contact form submissions are emailed to ganeshsharna7114@gmail.com
 All user signup/login data is stored in Supabase PostgreSQL database
 Website is fully responsive — works perfectly on phone, tablet, laptop, desktop
 3D animations on every major UI element
@@ -314,5 +314,5 @@ PHASE 7: Admin Panel (UPDATED)
 FINAL NOTES
 This document contains everything needed to build the Nightmare educational marketplace from scratch with the new subject folder system and developer-only admin access. All changeable values (website name, contact info, API keys) are isolated in Section 01 and should be stored in CONFIG.md and .env files for easy future updates.
 
-Contact: sunlight0026@gmail.com | Instagram: @nightmare_ff_26
+Contact: ganeshsharna7114@gmail.com | Instagram: @nightmare_ff_26
 nightmare — Build Prompt v3.0 — Subject Folder System

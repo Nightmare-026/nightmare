@@ -8,7 +8,7 @@ DOMAIN=https://nightmare.com
 LOGO_URL=https://nightmare.com/logo.png
 
 ## CONTACT INFORMATION
-ADMIN_EMAIL=sunlight0026@gmail.com
+ADMIN_EMAIL=ganeshsharna7114@gmail.com
 SUPPORT_EMAIL=support@nightmare.com
 CONTACT_PHONE=+91 XXXXX XXXXX
 INSTAGRAM=@nightmare_ff_26
@@ -20,7 +20,7 @@ SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 DATABASE_URL=your_database_url
 
-DEVELOPER_EMAIL=sunlight0026@gmail.com
+DEVELOPER_EMAIL=ganeshsharna7114@gmail.com
 
 JWT_SECRET=your_jwt_secret
 REFRESH_TOKEN_SECRET=your_refresh_token_secret
@@ -38,12 +38,12 @@ AWS_REGION=your_aws_region
 AWS_S3_BUCKET=your_s3_bucket
 
 RESEND_API_KEY=your_resend_api_key
-FEEDBACK_EMAIL=sunlight0026@gmail.com
+FEEDBACK_EMAIL=ganeshsharna7114@gmail.com
 
 # Frontend .env.local
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_DEVELOPER_EMAIL=sunlight0026@gmail.com
+NEXT_PUBLIC_DEVELOPER_EMAIL=ganeshsharna7114@gmail.com
 NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key_id
 
 ## DEVELOPMENT SETTINGS
