@@ -9,7 +9,10 @@ import {
   Mail, 
   ExternalLink,
   ChevronDown,
-  Filter
+  Filter,
+  Send,
+  X,
+  Loader2
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -32,6 +35,9 @@ export default function FeedbackPage() {
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [replyingTo, setReplyingTo] = useState<Feedback | null>(null);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [isSendingReply, setIsSendingReply] = useState(false);
 
   useEffect(() => {
     fetchFeedback();
@@ -40,7 +46,7 @@ export default function FeedbackPage() {
   const fetchFeedback = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/feedback/site`, {
+      const response = await fetch(`${API_URL}/admin/feedback`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -51,6 +57,40 @@ export default function FeedbackPage() {
       console.error('Failed to fetch feedback:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleReply = async () => {
+    if (!replyingTo || !replyMessage.trim()) return;
+
+    setIsSendingReply(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/admin/feedback/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          feedbackId: replyingTo.id,
+          replyMessage
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Reply sent successfully!');
+        setReplyingTo(null);
+        setReplyMessage('');
+      } else {
+        alert(data.error || 'Failed to send reply');
+      }
+    } catch (error) {
+      console.error('Failed to send reply:', error);
+      alert('An error occurred while sending the reply');
+    } finally {
+      setIsSendingReply(false);
     }
   };
 
@@ -146,9 +186,13 @@ export default function FeedbackPage() {
                 </div>
 
                 <div className="hidden md:flex flex-col items-end gap-2">
-                   <div className="w-10 h-10 rounded-full bg-violet-600/20 flex items-center justify-center">
-                     <MessageSquare className="w-5 h-5 text-violet-400" />
-                   </div>
+                  <button 
+                    onClick={() => setReplyingTo(item)}
+                    className="px-4 py-2 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white border border-violet-600/20 rounded-lg transition-all flex items-center gap-2"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Reply
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -160,6 +204,75 @@ export default function FeedbackPage() {
           </div>
         )}
       </div>
+
+      {/* Reply Modal */}
+      {replyingTo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden"
+          >
+            <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-800/30">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Mail className="w-5 h-5 text-violet-400" />
+                Reply to Feedback
+              </h2>
+              <button 
+                onClick={() => setReplyingTo(null)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-2">Original Message</p>
+                <p className="text-slate-300 italic text-sm">"{replyingTo.message}"</p>
+                <p className="mt-2 text-xs text-slate-400">— {replyingTo.email || 'Anonymous'}</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300">Your Reply</label>
+                <textarea
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                  placeholder="Enter your response here..."
+                  className="w-full h-32 px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="p-6 bg-slate-800/30 border-t border-slate-800 flex justify-end gap-3">
+              <button
+                onClick={() => setReplyingTo(null)}
+                className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                disabled={isSendingReply}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReply}
+                disabled={isSendingReply || !replyMessage.trim()}
+                className="px-6 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 rounded-lg text-white font-semibold transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isSendingReply ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Send Reply
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

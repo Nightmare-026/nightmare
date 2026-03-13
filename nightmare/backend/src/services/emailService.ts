@@ -5,7 +5,7 @@ dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.EMAIL_FROM || 'Nightmare <onboarding@resend.dev>';
-const adminEmail = process.env.FEEDBACK_EMAIL || 'ganeshsharma714@gmail.com';
+const adminEmail = process.env.FEEDBACK_EMAIL || 'ganeshsharma@gmail.com';
 
 export class EmailService {
   /**
@@ -70,6 +70,44 @@ export class EmailService {
       return { success: true };
     } catch (error) {
       console.error('Error sending user confirmation email:', error);
+      return { success: false, error };
+    }
+  }
+
+  /**
+   * Send a reply to user feedback
+   */
+  static async sendFeedbackReply(userEmail: string, replyMessage: string, originalMessage: string) {
+    try {
+      await resend.emails.send({
+        from: fromEmail,
+        to: userEmail,
+        subject: 'Reply to your feedback - Question Hub',
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
+            <h2 style="color: #7c3aed;">Message from Question Hub Admin</h2>
+            <p>Hello,</p>
+            <p>Thank you for your feedback. Here is our response to your message:</p>
+            
+            <div style="background: #f9f9f9; padding: 20px; border-left: 4px solid #7c3aed; border-radius: 4px; margin: 20px 0;">
+              <p style="font-weight: bold; margin-bottom: 10px; color: #666;">Our Response:</p>
+              <p style="white-space: pre-wrap; font-size: 16px; line-height: 1.6;">${replyMessage}</p>
+            </div>
+
+            <div style="margin-top: 30px; font-size: 14px; color: #888; border-top: 1px solid #eee; padding-top: 20px;">
+              <p><strong>In response to your earlier feedback:</strong></p>
+              <p style="font-style: italic; color: #999;">\"${originalMessage}\"</p>
+            </div>
+
+            <br />
+            <p>Best regards,</p>
+            <p><strong>Ganesh Sharma</strong><br/>Question Hub Administrator</p>
+          </div>
+        `
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending feedback reply email:', error);
       return { success: false, error };
     }
   }

@@ -21,6 +21,7 @@ const productSchema = z.object({
   fileUrl: z.string().url(),
   previewUrl: z.string().url().optional(),
   thumbnailUrl: z.string().url().optional(),
+  isActive: z.boolean().default(true).optional(),
   tags: z.array(z.string()).default([])
 });
 
@@ -162,7 +163,8 @@ router.post('/', verifyJWT, developerOnly, async (req: AuthRequest, res) => {
         fileUrl: data.fileUrl,
         previewUrl: data.previewUrl,
         thumbnailUrl: data.thumbnailUrl,
-        tags: data.tags
+        tags: data.tags,
+        isActive: data.isActive ?? true
       }
     });
 

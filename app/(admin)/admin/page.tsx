@@ -7,7 +7,8 @@ import {
   Package,
   ShoppingBag,
   TrendingUp,
-  Users
+  Users,
+  Heart
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -20,6 +21,7 @@ interface Stats {
   ordersByStatus: { status: string; _count: { status: number } }[];
   recentOrders: Array<{id: string; amount: number; status: string; user: {name: string}; product: {title: string}}>;
   popularProducts: Array<{id: string; title: string; downloadsCount: number}>;
+  totalWishlists: number;
 }
 
 export default function AdminDashboard() {
@@ -59,6 +61,7 @@ export default function AdminDashboard() {
     { label: 'Total Users', value: stats?.totalUsers || 0, icon: Users, color: 'from-blue-500 to-cyan-500' },
     { label: 'Total Products', value: stats?.totalProducts || 0, icon: Package, color: 'from-violet-500 to-fuchsia-500' },
     { label: 'Total Orders', value: stats?.totalOrders || 0, icon: ShoppingBag, color: 'from-emerald-500 to-teal-500' },
+    { label: 'Wishlists', value: stats?.totalWishlists || 0, icon: Heart, color: 'from-pink-500 to-rose-500' },
     { label: 'Revenue', value: `₹${(stats?.totalRevenue || 0).toFixed(2)}`, icon: DollarSign, color: 'from-orange-500 to-amber-500' },
   ];
 
