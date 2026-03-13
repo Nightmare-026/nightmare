@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { verifyJWT, AuthRequest } from '../middleware/auth';
 import { developerOnly } from '../middleware/developerOnly';
 import { z } from 'zod';
+import { EmailService } from '../services/emailService';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -41,7 +42,13 @@ router.post('/site', async (req, res) => {
       }
     });
 
-    // TODO: Send email notification to admin
+    // Send email notification to admin
+    EmailService.sendAdminFeedbackNotification(data);
+
+    // Send confirmation to user if email provided
+    if (data.email) {
+      EmailService.sendUserFeedbackConfirmation(data.email);
+    }
 
     res.status(201).json({ success: true, data: feedback });
   } catch (error: any) {

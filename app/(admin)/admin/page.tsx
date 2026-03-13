@@ -71,17 +71,17 @@ export default function AdminDashboard() {
         {statCards.map((stat, index) => (
           <motion.div
             key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
-            className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl"
+            className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl hover:border-violet-600/30 transition-all group"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold text-white">{stat.value}</p>
+                <p className="text-slate-400 text-sm mb-1 group-hover:text-slate-300 transition-colors uppercase tracking-wider font-semibold">{stat.label}</p>
+                <p className="text-3xl font-bold text-white tracking-tight">{stat.value}</p>
               </div>
-              <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center`}>
+              <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -89,59 +89,75 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Recent Orders */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden mb-8">
-        <div className="p-6 border-b border-slate-800">
-          <h2 className="text-xl font-semibold text-white">Recent Orders</h2>
-        </div>
-        <div className="divide-y divide-slate-800">
-          {stats?.recentOrders?.length ? (
-            stats.recentOrders.slice(0, 5).map((order) => (
-              <div key={order.id} className="p-4 flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-white">{order.product.title}</p>
-                  <p className="text-sm text-slate-500">by {order.user.name}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-white">₹{order.amount}</span>
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    order.status === 'paid' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'
-                  }`}>
-                    {order.status}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="p-8 text-center text-slate-500">No recent orders</div>
-          )}
-        </div>
-      </div>
-
-      {/* Popular Products */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
-        <div className="p-6 border-b border-slate-800">
-          <h2 className="text-xl font-semibold text-white">Popular Products</h2>
-        </div>
-        <div className="divide-y divide-slate-800">
-          {stats?.popularProducts?.length ? (
-            stats.popularProducts.slice(0, 5).map((product, index) => (
-              <div key={product.id} className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 bg-slate-800 rounded-full flex items-center justify-center text-sm text-slate-400">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="font-medium text-white">{product.title}</p>
-                    <p className="text-sm text-slate-500">{product.downloadsCount} downloads</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Recent Orders */}
+        <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-800/30">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-violet-400" />
+              Recent Sales
+            </h2>
+            <button className="text-sm text-violet-400 hover:text-violet-300 transition-colors">View All</button>
+          </div>
+          <div className="divide-y divide-slate-800/50">
+            {stats?.recentOrders?.length ? (
+              stats.recentOrders.slice(0, 8).map((order) => (
+                <div key={order.id} className="p-4 flex items-center justify-between hover:bg-slate-800/20 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-violet-400">
+                      {order.user.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium text-white group-hover:text-violet-400 transition-colors">{order.product.title}</p>
+                      <p className="text-sm text-slate-500">{order.user.name} • {order.user.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="font-bold text-white">₹{order.amount}</p>
+                      <p className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">Paid</p>
+                    </div>
                   </div>
                 </div>
-                <TrendingUp className="w-5 h-5 text-emerald-400" />
+              ))
+            ) : (
+              <div className="p-12 text-center">
+                <ShoppingBag className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+                <p className="text-slate-500">No recent sales found</p>
               </div>
-            ))
-          ) : (
-            <div className="p-8 text-center text-slate-500">No data available</div>
-          )}
+            )}
+          </div>
+        </div>
+
+        {/* Popular Products */}
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-slate-800 bg-slate-800/30">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-400" />
+              Top Products
+            </h2>
+          </div>
+          <div className="p-4 space-y-4">
+            {stats?.popularProducts?.length ? (
+              stats.popularProducts.slice(0, 6).map((product, index) => (
+                <div key={product.id} className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <p className="text-sm font-medium text-slate-200 truncate pr-4">{product.title}</p>
+                    <span className="text-xs font-bold text-slate-400">{product.downloadsCount}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((product.downloadsCount / (stats.popularProducts[0].downloadsCount || 1)) * 100, 100)}%` }}
+                      className="h-full bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-full shadow-[0_0_8px_rgba(139,92,246,0.3)]"
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-slate-500">No product data</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
