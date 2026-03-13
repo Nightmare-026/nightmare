@@ -8,6 +8,7 @@ import {
   FolderOpen,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
   ShoppingBag,
   Users
 } from 'lucide-react';
@@ -19,6 +20,7 @@ const adminLinks = [
   { href: '/admin/products', label: 'Products', icon: BookOpen },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare },
 ];
 
 export default function AdminLayout({
