@@ -57,6 +57,7 @@ serve(async (req) => {
           'Prefer': 'return=representation'
         },
         body: JSON.stringify({
+          id: crypto.randomUUID(),
           email,
           name,
           password_hash: hashHex
