@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit2, FolderOpen, X } from 'lucide-react';
 
-const API_URL = '/api';
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface Subject {
   id: string;
@@ -16,32 +20,45 @@ interface Subject {
   _count?: { products: number };
 }
 
-const categories = [
-  { id: 'class-1-8', name: 'Class 1-8', slug: 'class-1-8' },
-  { id: 'class-9-10', name: 'Class 9-10', slug: 'class-9-10' },
-  { id: 'polytechnic-cse', name: 'Polytechnic (CSE)', slug: 'polytechnic-cse' },
-  { id: 'polytechnic-ee', name: 'Polytechnic (EE)', slug: 'polytechnic-ee' },
-];
-
 export default function SubjectsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    categoryId: categories[0].id,
+    categoryId: '',
     description: '',
   });
 
   useEffect(() => {
     fetchSubjects();
+    fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (categories.length > 0 && !formData.categoryId) {
+      setFormData(prev => ({ ...prev, categoryId: categories[0].id }));
+    }
+  }, [categories]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories');
+      const data = await response.json();
+      if (data.success) {
+        setCategories(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
 
   const fetchSubjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/subjects`, {
+      const response = await fetch('/api/subjects', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -59,7 +76,7 @@ export default function SubjectsPage() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/subjects`, {
+      const response = await fetch('/api/subjects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +87,11 @@ export default function SubjectsPage() {
       const data = await response.json();
       if (data.success) {
         setShowCreateModal(false);
-        setFormData({ name: '', categoryId: categories[0].id, description: '' });
+        setFormData({ 
+          name: '', 
+          categoryId: categories[0]?.id || '', 
+          description: '' 
+        });
         fetchSubjects();
       }
     } catch (error) {
@@ -84,7 +105,7 @@ export default function SubjectsPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/subjects/${editingSubject.id}`, {
+      const response = await fetch(`/api/subjects/${editingSubject.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +119,11 @@ export default function SubjectsPage() {
       const data = await response.json();
       if (data.success) {
         setEditingSubject(null);
-        setFormData({ name: '', categoryId: categories[0].id, description: '' });
+        setFormData({ 
+          name: '', 
+          categoryId: categories[0]?.id || '', 
+          description: '' 
+        });
         fetchSubjects();
       }
     } catch (error) {
@@ -111,7 +136,7 @@ export default function SubjectsPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/subjects/${id}`, {
+      const response = await fetch(`/api/subjects/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -154,7 +179,6 @@ export default function SubjectsPage() {
         </button>
       </div>
 
-      {/* Subjects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {subjects.map((subject, index) => (
           <motion.div
@@ -172,7 +196,7 @@ export default function SubjectsPage() {
                 <div>
                   <h3 className="font-semibold text-white">{subject.name}</h3>
                   <p className="text-sm text-slate-500">
-                    {categories.find(c => c.id === subject.categoryId)?.name || subject.categoryId}
+                    {categories.find(c => c.id === subject.categoryId)?.name || 'Unknown Category'}
                   </p>
                 </div>
               </div>
@@ -210,7 +234,6 @@ export default function SubjectsPage() {
         ))}
       </div>
 
-      {/* Create/Edit Modal */}
       {(showCreateModal || editingSubject) && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <motion.div
@@ -226,7 +249,11 @@ export default function SubjectsPage() {
                 onClick={() => {
                   setShowCreateModal(false);
                   setEditingSubject(null);
-                  setFormData({ name: '', categoryId: categories[0].id, description: '' });
+                  setFormData({ 
+                    name: '', 
+                    categoryId: categories[0]?.id || '', 
+                    description: '' 
+                  });
                 }}
                 className="p-2 text-slate-400 hover:text-white transition-colors"
                 title="Close Modal"
@@ -280,7 +307,11 @@ export default function SubjectsPage() {
                   onClick={() => {
                     setShowCreateModal(false);
                     setEditingSubject(null);
-                    setFormData({ name: '', categoryId: categories[0].id, description: '' });
+                    setFormData({ 
+                      name: '', 
+                      categoryId: categories[0]?.id || '', 
+                      description: '' 
+                    });
                   }}
                   className="flex-1 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white transition-colors"
                 >

@@ -1,9 +1,14 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Mail, Instagram, Heart } from 'lucide-react';
+import { BookOpen, Mail, Instagram, Heart, Loader2, CheckCircle } from 'lucide-react';
 import { AdminLink } from './AdminLink';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   const footerLinks = {
     shop: [
@@ -16,6 +21,23 @@ export function Footer() {
       { label: 'About Us', href: '/about' },
       { label: 'Contact', href: '/contact' },
     ],
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    setStatus('loading');
+    try {
+      // Simulate/Implement subscription logic
+      // In a real app, this would call /api/newsletter
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setStatus('success');
+      setEmail('');
+      setTimeout(() => setStatus('idle'), 3000);
+    } catch (error) {
+      setStatus('error');
+    }
   };
 
   return (
@@ -96,19 +118,36 @@ export function Footer() {
             <p className="text-slate-400 text-sm mb-4">
               Subscribe for new resources and exclusive offers.
             </p>
-            <form className="flex gap-2">
+            <form className="flex gap-2" onSubmit={handleSubscribe}>
               <input
                 type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-violet-500"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg text-white text-sm transition-colors"
+                disabled={status === 'loading' || status === 'success'}
+                className={`px-4 py-2 rounded-lg text-white text-sm transition-colors flex items-center justify-center min-w-[100px] ${
+                  status === 'success' 
+                    ? 'bg-emerald-600' 
+                    : 'bg-violet-600 hover:bg-violet-700'
+                }`}
               >
-                Subscribe
+                {status === 'loading' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : status === 'success' ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  'Subscribe'
+                )}
               </button>
             </form>
+            {status === 'success' && (
+              <p className="text-emerald-400 text-xs mt-2 animate-fade-in">Thanks for subscribing!</p>
+            )}
           </div>
         </div>
 

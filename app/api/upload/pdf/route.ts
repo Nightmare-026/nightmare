@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import cloudinary from '@/lib/cloudinary';
 import { verifyJWT } from '@/lib/auth';
 
-const DEVELOPER_EMAIL = process.env.NEXT_PUBLIC_DEVELOPER_EMAIL || 'ganeshsharna7114@gmail.com';
+export const dynamic = 'force-dynamic';
+
+const DEVELOPER_EMAIL = process.env.DEVELOPER_EMAIL;
 
 export async function POST(request: Request) {
   try {
     const user = await verifyJWT();
-    if (!user || user.email !== DEVELOPER_EMAIL) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    if (!user || !DEVELOPER_EMAIL || user.email !== DEVELOPER_EMAIL) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
     const formData = await request.formData();

@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import prisma from '@/lib/prisma';
 import { verifyJWT } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const user = await verifyJWT();
@@ -11,6 +13,10 @@ export async function POST(request: Request) {
     }
 
     const { orderId, razorpayPaymentId, razorpaySignature } = await request.json();
+
+    if (!orderId || !razorpayPaymentId || !razorpaySignature) {
+      return NextResponse.json({ success: false, error: 'Missing payment details' }, { status: 400 });
+    }
 
     const order = await prisma.order.findFirst({
       where: { razorpayOrderId: orderId },
@@ -21,14 +27,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
 
-    // Verify signature
+    // Verify ownership
+    if (order.userId !== user.id) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // ALWAYS verify signature — removed NODE_ENV condition
     const body = orderId + '|' + razorpayPaymentId;
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'test_secret')
-      .update(body.toString())
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+      .update(body)
       .digest('hex');
 
-    if (expectedSignature !== razorpaySignature && process.env.NODE_ENV === 'production') {
+    if (expectedSignature !== razorpaySignature) {
       await prisma.order.update({
         where: { id: order.id },
         data: { status: 'failed' }

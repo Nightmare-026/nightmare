@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation';
 import { BookOpen, Download, Heart, Loader2, Package, ShoppingBag, User } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 
-const API_URL = '/api';
-
 interface Order {
   id: string;
   amount: number;
@@ -25,6 +23,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -34,14 +33,16 @@ export default function DashboardPage() {
     }
 
     if (user) {
-      fetchOrders();
+      Promise.all([fetchOrders(), fetchWishlistCount()]).finally(() => {
+        setIsLoading(false);
+      });
     }
   }, [user, authLoading, router]);
 
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/orders/my-orders`, {
+      const response = await fetch('/api/orders', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -52,8 +53,23 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const fetchWishlistCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/wishlist/count', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setWishlistCount(data.data.count || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch wishlist count:', error);
     }
   };
 
@@ -71,7 +87,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      {/* Header */}
       <div className="bg-slate-900/50 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4">
@@ -87,7 +102,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
             <div className="flex items-center gap-3 mb-2">
@@ -118,11 +132,10 @@ export default function DashboardPage() {
               </div>
               <span className="text-slate-400">Wishlist</span>
             </div>
-            <p className="text-3xl font-bold text-white">0</p>
+            <p className="text-3xl font-bold text-white">{wishlistCount}</p>
           </div>
         </div>
 
-        {/* Orders */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
           <div className="p-6 border-b border-slate-800">
             <h2 className="text-xl font-semibold text-white">My Orders</h2>

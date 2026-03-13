@@ -1,24 +1,13 @@
 # Dependencies
 node_modules/
-nightmare/node_modules/
-nightmare/backend/node_modules/
-
-# Next.js
 .next/
-nightmare/.next/
 out/
-
-# Production build
 dist/
-nightmare/backend/dist/
 
 # Environment variables
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-nightmare/backend/.env
+.env.*.local
 
 # Logs
 npm-debug.log*
@@ -29,8 +18,6 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Prisma
-nightmare/backend/node_modules/.prisma/
-
-# Supabase
-nightmare/supabase/.temp/
+# Internal
+Prompt/
+nightmare/

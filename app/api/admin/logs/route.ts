@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyJWT } from '@/lib/auth';
 
-const DEVELOPER_EMAIL = process.env.NEXT_PUBLIC_DEVELOPER_EMAIL || 'ganeshsharna7114@gmail.com';
+export const dynamic = 'force-dynamic';
+
+const DEVELOPER_EMAIL = process.env.DEVELOPER_EMAIL;
 
 export async function GET() {
   try {
     const user = await verifyJWT();
-    if (!user || user.email !== DEVELOPER_EMAIL) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    if (!user || !DEVELOPER_EMAIL || user.email !== DEVELOPER_EMAIL) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
     const logs = await prisma.adminLog.findMany({
@@ -25,17 +27,22 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await verifyJWT();
-    if (!user || user.email !== DEVELOPER_EMAIL) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    if (!user || !DEVELOPER_EMAIL || user.email !== DEVELOPER_EMAIL) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
     const { action, details } = await request.json();
+
+    // Get real IP from request headers
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+            || request.headers.get('x-real-ip')
+            || 'unknown';
 
     const log = await prisma.adminLog.create({
       data: {
         action,
         userEmail: user.email,
-        ipAddress: 'serverless-func',
+        ipAddress: ip,
         details: details || {}
       }
     });

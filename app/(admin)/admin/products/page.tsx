@@ -86,18 +86,18 @@ export default function ProductsPage() {
 
   const fetchMetadata = async () => {
     try {
-      const response = await fetch(`${API_URL}/subjects`);
-      const data = await response.json();
-      if (data.success) {
-        setSubjects(data.data);
-        const uniqueCats = Array.from(new Set(data.data.map((s: any) => s.categoryId))).map((id: any) => {
-          const subject = data.data.find((s: any) => s.categoryId === id);
-          return {
-            id,
-            name: subject?.category?.name || id.replace(/-/g, ' ').toUpperCase()
-          };
-        });
-        setCategories(uniqueCats);
+      // Fetch categories
+      const catRes = await fetch(`${API_URL}/categories`);
+      const catData = await catRes.json();
+      if (catData.success) {
+        setCategories(catData.data);
+      }
+
+      // Fetch subjects (all for admin)
+      const subRes = await fetch(`${API_URL}/subjects`);
+      const subData = await subRes.json();
+      if (subData.success) {
+        setSubjects(subData.data);
       }
     } catch (error) {
       console.error('Failed to fetch metadata:', error);
@@ -214,6 +214,11 @@ export default function ProductsPage() {
     p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Filter subjects by selected category
+  const filteredSubjects = formData.categoryId 
+    ? subjects.filter(s => s.categoryId === formData.categoryId)
+    : [];
 
   if (isLoading) {
     return (
@@ -448,22 +453,34 @@ export default function ProductsPage() {
                         ))}
                       </div>
                     </div>
+                    
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-400 ml-1">Subject</label>
-                      <select
-                        required
-                        value={formData.subjectId}
-                        onChange={(e) => {
-                          const sub = subjects.find(s => s.id === e.target.value);
-                          setFormData({...formData, subjectId: e.target.value, categoryId: sub?.categoryId || ''});
-                        }}
-                        className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-violet-600 outline-none appearance-none"
-                      >
-                        <option value="">Select Subject</option>
-                        {subjects.map(s => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                      </select>
+                      <label className="text-sm font-semibold text-slate-400 ml-1">Category & Subject</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <select
+                          required
+                          value={formData.categoryId}
+                          onChange={(e) => setFormData({...formData, categoryId: e.target.value, subjectId: ''})}
+                          className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-violet-600 outline-none appearance-none text-sm"
+                        >
+                          <option value="">Category</option>
+                          {categories.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                        <select
+                          required
+                          value={formData.subjectId}
+                          onChange={(e) => setFormData({...formData, subjectId: e.target.value})}
+                          className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-violet-600 outline-none appearance-none text-sm"
+                          disabled={!formData.categoryId}
+                        >
+                          <option value="">Subject</option>
+                          {filteredSubjects.map(s => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
 
@@ -601,29 +618,29 @@ export default function ProductsPage() {
 
               <div className="p-8 border-t border-slate-800 bg-slate-800/30 flex gap-4">
                 <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-4 text-slate-400 font-bold hover:text-white transition-colors"
+                   type="button"
+                   onClick={() => setShowCreateModal(false)}
+                   className="flex-1 py-4 text-slate-400 font-bold hover:text-white transition-colors"
                 >
-                  Cancel
+                   Cancel
                 </button>
                 <button
-                  form="product-form"
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-[2] py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 rounded-2xl text-white font-bold text-lg transition-all shadow-xl shadow-violet-600/30 disabled:opacity-50 flex items-center justify-center gap-3"
+                   form="product-form"
+                   type="submit"
+                   disabled={isSubmitting}
+                   className="flex-[2] py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 rounded-2xl text-white font-bold text-lg transition-all shadow-xl shadow-violet-600/30 disabled:opacity-50 flex items-center justify-center gap-3"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-6 h-6 animate-spin text-white" />
-                      Publishing...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5 text-white" />
-                      Publish Asset
-                    </>
-                  )}
+                   {isSubmitting ? (
+                     <>
+                       <Loader2 className="w-6 h-6 animate-spin text-white" />
+                       Publishing...
+                     </>
+                   ) : (
+                     <>
+                       <Plus className="w-5 h-5 text-white" />
+                       Publish Asset
+                     </>
+                   )}
                 </button>
               </div>
             </motion.div>

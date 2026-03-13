@@ -6,6 +6,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  isAdmin: boolean;
 }
 
 interface AuthContextType {
@@ -19,9 +20,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEVELOPER_EMAIL = process.env.NEXT_PUBLIC_DEVELOPER_EMAIL || 'ganeshsharna7114@gmail.com';
-const API_URL = '/api';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -32,11 +30,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem('user');
 
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setToken(storedToken);
+        setUser(parsedUser);
+        // Re-verify with server to get fresh isAdmin status
+        verifyWithServer(storedToken);
+      } catch {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
+
+  const verifyWithServer = async (authToken: string) => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setUser(data.data.user);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
+      } else {
+        logout();
+      }
+    } catch (error) {
+      console.error('Auth verification failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const login = (userData: User, authToken: string) => {
     setUser(userData);
@@ -52,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
   };
 
-  const isAdmin = user?.email === DEVELOPER_EMAIL;
+  const isAdmin = user?.isAdmin === true;
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, isLoading, isAdmin }}>
@@ -64,32 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
-}
-
-export async function apiRequest(endpoint: string, options: RequestInit = {}, token?: string | null) {
-  const url = `${API_URL}${endpoint}`;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...((options.headers as Record<string, string>) || {}),
-  };
-
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || 'Something went wrong');
-  }
-
-  return data;
 }

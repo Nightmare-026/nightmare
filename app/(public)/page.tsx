@@ -1,47 +1,30 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { BookOpen, Download, Star, Zap, ArrowRight } from 'lucide-react';
+import { BookOpen, Download, Star, Zap, ArrowRight, Loader2 } from 'lucide-react';
 
-const categories = [
-  {
-    name: 'Class 1-8',
-    slug: 'class-1-8',
-    icon: '📚',
-    description: 'Primary school resources',
-    subjects: 8,
-    pdfs: 200,
-    color: 'from-blue-500 to-cyan-500',
-  },
-  {
-    name: 'Class 9-10',
-    slug: 'class-9-10',
-    icon: '🎓',
-    description: 'Secondary school materials',
-    subjects: 12,
-    pdfs: 350,
-    color: 'from-violet-500 to-fuchsia-500',
-  },
-  {
-    name: 'Polytechnic (CSE)',
-    slug: 'polytechnic-cse',
-    icon: '💻',
-    description: 'Computer Science & Engineering',
-    subjects: 15,
-    pdfs: 280,
-    color: 'from-emerald-500 to-teal-500',
-  },
-  {
-    name: 'Polytechnic (EE)',
-    slug: 'polytechnic-ee',
-    icon: '⚡',
-    description: 'Electrical Engineering',
-    subjects: 12,
-    pdfs: 250,
-    color: 'from-orange-500 to-amber-500',
-  },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  description: string | null;
+  _count: {
+    products: number;
+    subjects: number;
+  };
+}
+
+const categoryColors: Record<string, string> = {
+  'class-1-8': 'from-blue-500 to-cyan-500',
+  'class-9-10': 'from-violet-500 to-fuchsia-500',
+  'polytechnic-cse': 'from-emerald-500 to-teal-500',
+  'polytechnic-ee': 'from-orange-500 to-amber-500',
+};
+
+const defaultColor = 'from-slate-500 to-slate-600';
 
 const features = [
   {
@@ -62,6 +45,27 @@ const features = [
 ];
 
 export default function HomePage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -131,35 +135,41 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((category, index) => (
-              <motion.div
-                key={category.slug}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Link href={`/shop?category=${category.slug}`}>
-                  <div className="group relative p-6 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl hover:border-violet-500/50 transition-all duration-300 hover:transform hover:scale-105">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform`}>
-                      {category.icon}
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {categories.map((category, index) => (
+                <motion.div
+                  key={category.slug}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Link href={`/shop?category=${category.slug}`}>
+                    <div className="group relative p-6 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl hover:border-violet-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${categoryColors[category.slug] || defaultColor} flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform`}>
+                        {category.icon || '📁'}
+                      </div>
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        {category.name}
+                      </h3>
+                      <p className="text-slate-400 text-sm mb-4">
+                        {category.description || 'Browse documents for this category'}
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                        <span>{category._count.subjects} subjects</span>
+                        <span>{category._count.products}+ PDFs</span>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">
-                      {category.name}
-                    </h3>
-                    <p className="text-slate-400 text-sm mb-4">
-                      {category.description}
-                    </p>
-                    <div className="flex items-center gap-4 text-sm text-slate-500">
-                      <span>{category.subjects} subjects</span>
-                      <span>{category.pdfs}+ PDFs</span>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -4,19 +4,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
+        hostname: 'res.cloudinary.com',
       },
     ],
   },
   eslint: {
-    // Allow production builds to successfully complete even with ESLint errors
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
 };
 
 export default nextConfig;
-

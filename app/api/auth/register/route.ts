@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { SignJWT } from 'jose';
+
+export const dynamic = 'force-dynamic';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 
@@ -34,11 +36,12 @@ export async function POST(request: Request) {
       select: { id: true, email: true, name: true }
     });
 
-    const token = jwt.sign(
-      { userId: user.id },
-      process.env.JWT_SECRET! as jwt.Secret,
-      { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any }
-    );
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    const token = await new SignJWT({ userId: user.id })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(process.env.JWT_EXPIRES_IN || '7d')
+      .sign(secret);
 
     return NextResponse.json({
       success: true,

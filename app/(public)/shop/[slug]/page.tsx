@@ -70,7 +70,7 @@ export default function ProductDetailPage() {
   const checkPurchaseStatus = async (productId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/orders/my-orders`, {
+      const res = await fetch('/api/orders', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
