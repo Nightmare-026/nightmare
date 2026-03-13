@@ -53,13 +53,13 @@ serve(async (req) => {
         headers: {
           'apikey': supabaseKey,
           'authorization': `Bearer ${supabaseKey}`,
-          'content-type': 'application/json'
+          'content-type': 'application/json',
+          'Prefer': 'return=representation'
         },
         body: JSON.stringify({
           email,
           name,
-          passwordHash: hashHex,
-          action
+          password_hash: hashHex
         })
       })
 
@@ -140,7 +140,7 @@ serve(async (req) => {
       const user = users[0]
 
       // Compare password hashes
-      if (user.passwordHash !== hashHex) {
+      if (user.password_hash !== hashHex) {
         return new Response(
           JSON.stringify({ success: false, error: 'Invalid email or password' }),
           {
