@@ -36,7 +36,7 @@ export function Footer() {
             </p>
             <div className="flex gap-3">
               <a
-                href="mailto:sunlight0026@gmail.com"
+                href="mailto:ganeshsharma714@gmail.com"
                 className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
                 title="Email Us"
               >

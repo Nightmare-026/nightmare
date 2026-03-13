@@ -5,7 +5,7 @@ dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.EMAIL_FROM || 'Nightmare <onboarding@resend.dev>';
-const adminEmail = process.env.FEEDBACK_EMAIL || 'sunlight0026@gmail.com';
+const adminEmail = process.env.FEEDBACK_EMAIL || 'ganeshsharma714@gmail.com';
 
 export class EmailService {
   /**
