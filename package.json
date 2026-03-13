@@ -12,7 +12,6 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
-    "@supabase/supabase-js": "^2.99.1",
     "autoprefixer": "^10.4.27",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",

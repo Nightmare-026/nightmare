@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
   DollarSign,
   Package,
@@ -25,6 +26,7 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -100,7 +102,12 @@ export default function AdminDashboard() {
               <ShoppingBag className="w-5 h-5 text-violet-400" />
               Recent Sales
             </h2>
-            <button className="text-sm text-violet-400 hover:text-violet-300 transition-colors">View All</button>
+            <button 
+              onClick={() => router.push('/admin/orders')}
+              className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+            >
+              View All
+            </button>
           </div>
           <div className="divide-y divide-slate-800/50">
             {stats?.recentOrders?.length ? (
