@@ -47,6 +47,8 @@ serve(async (req) => {
       console.log('Supabase URL:', supabaseUrl)
       console.log('Creating user with data:', { email, name, passwordHash: hashHex, action })
       
+      const now = new Date().toISOString()
+      
       // Create user in database
       const response = await fetch(`${supabaseUrl}/rest/v1/users`, {
         method: 'POST',
@@ -60,7 +62,9 @@ serve(async (req) => {
           id: crypto.randomUUID(),
           email,
           name,
-          password_hash: hashHex
+          password_hash: hashHex,
+          created_at: now,
+          updated_at: now
         })
       })
 
