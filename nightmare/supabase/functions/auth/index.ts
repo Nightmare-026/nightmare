@@ -18,7 +18,10 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const path = url.pathname.replace('/functions/v1/auth', '')
+    // Strip both possible prefixes to get the relative path
+    const path = url.pathname
+      .replace('/functions/v1/auth', '')
+      .replace('/auth', '') || '/'
 
     console.log('Request URL:', req.url)
     console.log('Request method:', req.method)
