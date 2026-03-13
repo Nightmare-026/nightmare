@@ -19,7 +19,7 @@ interface Stats {
   totalOrders: number;
   totalRevenue: number;
   ordersByStatus: { status: string; _count: { status: number } }[];
-  recentOrders: Array<{id: string; amount: number; status: string; user: {name: string}; product: {title: string}}>;
+  recentOrders: Array<{id: string; amount: number; status: string; user: {name: string; email: string}; product: {title: string}}>;
   popularProducts: Array<{id: string; title: string; downloadsCount: number}>;
   totalWishlists: number;
 }

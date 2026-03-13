@@ -90,7 +90,7 @@ export default function ProductsPage() {
       const data = await response.json();
       if (data.success) {
         setSubjects(data.data);
-        const uniqueCats = Array.from(new Set(data.data.map((s: any) => s.categoryId))).map(id => {
+        const uniqueCats = Array.from(new Set(data.data.map((s: any) => s.categoryId))).map((id: any) => {
           const subject = data.data.find((s: any) => s.categoryId === id);
           return {
             id,
