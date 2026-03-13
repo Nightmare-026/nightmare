@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { ProductType } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +18,7 @@ export async function GET(request: Request) {
       isActive: true,
       ...(category && { category: { slug: category } }),
       ...(subject && { subject: { slug: subject } }),
-      ...(type && { type: type as ProductType }),
+      ...(type && { type: type as any }),
       ...(isFree !== null && { isFree: isFree === 'true' }),
       ...(search && {
         OR: [
