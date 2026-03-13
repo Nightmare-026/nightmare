@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { BookOpen, ChevronRight, Grid3X3, List, Loader2 } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = '/api';
 
 async function apiRequest(endpoint: string, options?: RequestInit) {
   const response = await fetch(`${API_URL}${endpoint}`, options);

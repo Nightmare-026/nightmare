@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { BookOpen, Eye, EyeOff, Loader2, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = '/api';
 
 export default function RegisterPage() {
   const router = useRouter();

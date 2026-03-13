@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BookOpen, Download, Heart, Loader2, Package, ShoppingBag, User } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = '/api';
 
 interface Order {
   id: string;

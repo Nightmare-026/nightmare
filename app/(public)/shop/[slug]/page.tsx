@@ -20,7 +20,7 @@ import { Footer } from '@/components/Footer';
 import { useAuth } from '@/components/AuthProvider';
 import Script from 'next/script';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = '/api';
 
 interface Product {
   id: string;
