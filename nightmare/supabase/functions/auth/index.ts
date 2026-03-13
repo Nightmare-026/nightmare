@@ -87,11 +87,100 @@ serve(async (req) => {
       )
     }
 
+    // POST /auth/login - Login user
+    if (req.method === 'POST' && path === '/login') {
+      const { email, password } = await req.json()
+      console.log('Login request for:', email)
+
+      // Hash the provided password
+      const encoder = new TextEncoder()
+      const data = encoder.encode(password)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map((b: number) => b.toString(16).padStart(2, '0')).join('')
+
+      // Look up user by email
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=*`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseKey,
+            'authorization': `Bearer ${supabaseKey}`,
+            'content-type': 'application/json'
+          }
+        }
+      )
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Database error:', error)
+        throw new Error('Login failed')
+      }
+
+      const users = await response.json()
+      console.log('Users found:', users.length)
+
+      if (users.length === 0) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Invalid email or password' }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 401
+          }
+        )
+      }
+
+      const user = users[0]
+
+      // Compare password hashes
+      if (user.passwordHash !== hashHex) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Invalid email or password' }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 401
+          }
+        )
+      }
+
+      // Generate a simple token (base64 encoded user info + timestamp)
+      const tokenPayload = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        iat: Date.now(),
+        exp: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+      }
+      const token = btoa(JSON.stringify(tokenPayload))
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            user: {
+              id: user.id,
+              email: user.email,
+              name: user.name
+            },
+            token: token
+          }
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      )
+    }
+
     return new Response(
-      JSON.stringify({ error: 'Method not allowed', path: path }),
+      JSON.stringify({ error: 'Route not found', path: path }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 405 
+        status: 404 
       }
     )
 
