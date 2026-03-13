@@ -78,6 +78,32 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get single product by ID (public)
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        subject: true,
+        _count: {
+          select: { reviews: true, quickReactions: true, wishlists: true }
+        }
+      }
+    });
+
+    if (!product) {
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    res.json({ success: true, data: product });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Get single product by slug (public)
 router.get('/slug/:slug', async (req, res) => {
   try {
