@@ -1,0 +1,318 @@
+NIGHTMARE
+AI Agent — Complete Website Build Prompt
+Educational PDF & Wallpaper Marketplace
+Version 3.0 — Subject Folder System with Developer-Only Admin Access
+
+HOW TO USE THIS DOCUMENT
+Read Section 1 first — it has ALL changeable config values in one place.
+Give this entire document to your AI coding agent (Claude, GPT-4, Cursor, etc.).
+The agent must follow sections in order — each section builds on the previous.
+Green AGENT INSTRUCTION boxes are direct commands the agent must follow exactly.
+API keys listed in Section 1 will be provided by the owner separately.
+NEW: Admin panel is LOCKED to developer email only (sunlight0026@gmail.com).
+NEW: Subject-based folder system for educational content organization.
+
+SECTIONS IN THIS DOCUMENT
+
+
+
+
+SECTION 01
+Configuration Variables
+WEBSITE IDENTITY — Update these when owner provides final values
+
+CONTACT INFORMATION — changeable anytime from admin panel or .env
+
+
+
+API KEYS & SECRETS — Owner will provide these. Use placeholders until then.
+
+SECTION 02
+Project Overview
+Build a complete full-stack educational marketplace called Nightmare. Students browse, preview, and purchase educational PDF documents organized by class and subject. The platform also offers aesthetic wallpaper images (4K, HD). The platform handles both free and paid content. Paid content unlocks only after verified Razorpay payment. An admin panel lets the developer manage all content, orders, and users.
+Core Requirements — Non-Negotiable
+Admin access is LOCKED to developer email (sunlight0026@gmail.com) — no other user can access /admin
+Admin can add, edit, delete any product AFTER the website is live — no code changes needed
+Admin can create subject folders within each category (Class)
+PDFs are organized: Category (Class) > Subject > Individual PDFs
+Admin can toggle any product between Free and Paid at any time
+Paid downloads require successful Razorpay payment before generating download link
+Free downloads require no payment — direct one-click download
+All user feedback and contact form submissions are emailed to sunlight0026@gmail.com
+All user signup/login data is stored in Supabase PostgreSQL database
+Website is fully responsive — works perfectly on phone, tablet, laptop, desktop
+3D animations on every major UI element
+Feedback system on every page and product
+Dark theme with Colorful Aesthetic Artistic visual style
+
+What the Admin Can Do Without Code
+Create new subject folders within categories (e.g., Physics, Mathematics in Class 9-10)
+Upload a new PDF or wallpaper image from admin dashboard
+Assign PDFs to specific subjects within their class category
+Set title, description, category, subject, tags, price for any product
+Switch any product from Free to Paid or Paid to Free instantly
+Activate or deactivate any product (hide/show on store)
+View all orders, download counts, revenue
+Issue refunds via dashboard (triggers Razorpay refund API)
+Manage users — view purchase history, ban accounts
+Create/disable promo codes
+View all user feedback and product reviews
+Reply to or delete reviews
+
+Fixed Category Structure
+The following categories are FIXED and cannot be changed by admin:
+Class 1-8
+Class 9-10
+Polytechnic (CSE)
+Polytechnic (EE)
+Within each category, admin can create unlimited subject folders (e.g., Physics, Chemistry, Data Structures, Electrical Machines).
+
+SECTION 03
+Complete Tech Stack
+Frontend Stack
+
+Backend Stack
+
+Storage & Payment
+
+Utility Packages
+
+SECTION 04
+Project Folder Structure
+nightmare/                    Root monorepo folder
+├── CONFIG.md                 All changeable config values
+├── .gitignore                Must include: .env .env.local node_modules
+├── README.md                 Setup instructions
+├── frontend/                 Next.js 14 App Router application
+│   ├── .env.local            Frontend env vars (NEXT_PUBLIC_* only)
+│   ├── app/                  Next.js app directory
+│   │   ├── (public)/         Public routes — no auth required
+│   │   │   ├── page.tsx      Homepage
+│   │   │   ├── shop/page.tsx Shop with category/subject filters
+│   │   │   ├── shop/[slug]/page.tsx Product detail
+│   │   │   ├── about/page.tsx
+│   │   │   ├── contact/page.tsx
+│   │   │   ├── login/page.tsx
+│   │   │   ├── register/page.tsx
+│   │   │   ├── cart/page.tsx
+│   │   │   └── success/page.tsx Post-payment success
+│   │   ├── (protected)/      Routes requiring login
+│   │   │   └── dashboard/page.tsx User dashboard
+│   │   └── (admin)/          DEVELOPER-ONLY routes
+│   │       ├── admin/page.tsx Admin dashboard
+│   │       ├── admin/products/page.tsx Manage products
+│   │       ├── admin/subjects/page.tsx Manage subjects
+│   │       ├── admin/orders/page.tsx
+│   │       ├── admin/users/page.tsx
+│   │       ├── admin/feedback/page.tsx
+│   │       └── admin/promo/page.tsx
+│   ├── components/           Reusable React components
+│   ├── lib/                  Utilities and helpers
+│   └── styles/               Global CSS and Tailwind config
+└── backend/                  Express.js REST API
+    ├── .env                  All backend env variables
+    ├── src/
+    │   ├── server.ts          Express app entry point
+    │   ├── routes/            auth, products, subjects, orders, admin
+    │   ├── controllers/       Business logic per route
+    │   ├── middleware/        auth.ts, developerOnly.ts, rateLimit.ts
+    │   ├── services/          razorpay, cloudinary, s3, email, download
+    │   ├── prisma/            schema.prisma — all tables
+    │   └── utils/             validators (Zod), hash, token
+
+
+SECTION 05
+Database Schema — Supabase PostgreSQL
+CRITICAL CHANGES IN V3.0:
+NEW: subjects table for subject folder system
+UPDATED: products table now has subject_id foreign key
+UPDATED: users table — admin role removed, access controlled by DEVELOPER_EMAIL only
+FIXED: categories — only 4 categories, pre-seeded, cannot be edited
+
+Table: users
+id (UUID PK), email (unique), password_hash, name, avatar_url, is_banned (bool, default false), created_at, updated_at
+NOTE: role field REMOVED. Admin access is determined by checking if user.email === process.env.DEVELOPER_EMAIL
+Table: categories (FIXED)
+id (UUID PK), name, slug (unique), icon (emoji string), description, display_order (int), is_active (bool), created_at
+FIXED CATEGORIES (pre-seeded in migration, cannot be changed):
+1. Class 1-8 (slug: class-1-8)
+2. Class 9-10 (slug: class-9-10)
+3. Polytechnic (CSE) (slug: polytechnic-cse)
+4. Polytechnic (EE) (slug: polytechnic-ee)
+Table: subjects (NEW)
+id (UUID PK), name (e.g., Physics, Data Structures), slug (unique), category_id (FK to categories), description (text, nullable), display_order (int), is_active (bool, default true), created_at, updated_at
+Admin can create unlimited subjects within each category from the admin panel.
+Table: products (UPDATED)
+id (UUID PK), title, slug (unique), description (text), category_id (FK), subject_id (FK to subjects, nullable for wallpapers), type (ENUM: pdf/wallpaper), price (decimal, nullable), is_free (bool), file_url (S3 for pdf / Cloudinary for wallpaper), preview_url (watermarked), thumbnail_url (400x300), tags (string[]), downloads_count (int, default 0), is_active (bool, default true), created_at, updated_at
+CHANGE: Added subject_id FK. For PDFs, this links to the subject folder. For wallpapers, this can be null.
+Table: orders
+id (UUID PK), user_id (FK users), product_id (FK products), amount (decimal), status (ENUM: pending/paid/failed/refunded), razorpay_order_id (unique), razorpay_payment_id (nullable, unique), razorpay_signature (nullable), created_at, updated_at
+Table: download_tokens
+id (UUID PK), user_id (FK users), product_id (FK products), token (UUID unique), order_id (FK orders, nullable — null for free downloads), expires_at (timestamp — 24 hours from creation), download_count (int, default 0), max_downloads (int, default 3), created_at
+Table: wishlists
+id (UUID PK), user_id (FK users), product_id (FK products), created_at. Unique constraint on (user_id, product_id)
+Table: product_reviews
+id (UUID PK), product_id (FK products), user_id (FK users), rating (int 1-5), review_text (text, nullable), is_verified_purchase (bool — true only if user has paid order for product), is_approved (bool, default true), helpful_count (int, default 0), photo_url (nullable), created_at
+Table: quick_reactions
+id (UUID PK), product_id (FK products), user_id (UUID nullable — allow anonymous), reaction_type (ENUM: fire/premium/creative/useful), ip_address, created_at. Unique constraint on (product_id, user_id) OR (product_id, ip_address) for anonymous
+Table: site_feedback
+id (UUID PK), section_name (e.g. hero/products/footer), page_url, rating (int 1-5), message (text, nullable), email (nullable), user_id (UUID nullable), created_at. On INSERT: trigger email to FEEDBACK_EMAIL
+Table: promo_codes
+id (UUID PK), code (unique uppercase), discount_type (ENUM: percent/flat), discount_value (decimal), usage_limit (int nullable), usage_count (int default 0), min_order_amount (decimal nullable), expires_at (nullable), is_active (bool default true), created_at
+Table: email_subscribers
+id (UUID PK), email (unique), is_active (bool default true), source (ENUM: footer/popup/checkout), created_at
+
+SECTION 13
+Admin Panel (UPDATED - Developer Only Access)
+CRITICAL SECURITY UPDATE:
+Users table NO LONGER has a 'role' field
+Admin access is determined ONLY by comparing user.email with DEVELOPER_EMAIL env variable
+If email doesn't match: return 403 immediately, do not process request
+Frontend should hide admin links for non-developer users entirely
+No user can become admin through database manipulation
+
+Backend Middleware: developerOnly.ts
+```typescript
+// backend/src/middleware/developerOnly.ts
+import { Request, Response, NextFunction } from 'express';
+
+export const developerOnly = (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user; // Set by auth middleware
+  
+  if (!user) {
+    return res.status(401).json({ success: false, error: 'UNAUTHORIZED' });
+  }
+  
+  if (user.email !== process.env.DEVELOPER_EMAIL) {
+    return res.status(403).json({ 
+      success: false, 
+      error: 'ACCESS_DENIED',
+      message: 'Admin access is restricted to authorized developer only'
+    });
+  }
+  
+  next();
+};
+```
+
+Admin Panel Features
+Subject Management (NEW)
+NEW admin page: /admin/subjects
+Shows all subjects grouped by category
+'Create New Subject' button — select category, enter subject name, slug auto-generated
+Edit subject name, description, display order
+Toggle subject active/inactive (hiding/showing all PDFs in that subject)
+Delete subject (only if no products assigned to it)
+Product Management (UPDATED)
+When uploading PDF: must select Category AND Subject
+Subject dropdown shows only subjects from selected category
+Wallpapers: subject_id can remain null
+All other features remain same: is_free toggle, pricing, watermarks, etc.
+Other Admin Pages (Unchanged)
+Admin Dashboard — revenue, stats, charts
+Order Management — view, filter, refund
+User Management — view, ban/unban
+Feedback Center — reviews, site feedback
+Promo Code Management
+
+SECTION 14
+Security Rules (UPDATED)
+UPDATED: Developer-Only Admin Access
+Admin route protection has been COMPLETELY REDESIGNED for maximum security:
+NO 'admin' role in database — eliminates database manipulation attack vector
+Access control is PURELY code-based — checking user.email === DEVELOPER_EMAIL
+DEVELOPER_EMAIL must be set in .env file on backend
+All /admin/* routes use TWO middleware: verifyJWT + developerOnly
+Frontend checks user.email === DEVELOPER_EMAIL to show/hide admin navigation
+If non-developer tries to access /admin: immediate 403 Forbidden
+Log all admin access attempts to admin_logs table with IP address
+
+All Other Security Rules (Unchanged)
+
+SECTION 07
+Frontend — Pages (UPDATED)
+Shop Page (UPDATED Filtering System)
+User Flow for Educational PDFs:
+1. Student lands on Shop page
+2. Sees 4 category cards: Class 1-8, Class 9-10, Polytechnic (CSE), Polytechnic (EE)
+3. Clicks their category (e.g., Class 9-10)
+4. Page updates to show subject folders for that category (e.g., Physics, Chemistry, Mathematics, Biology)
+5. Clicks subject folder (e.g., Physics)
+6. Shows all Physics PDFs for Class 9-10
+7. Can further filter by Free/Paid, sort by newest/oldest/downloads
+
+Shop Page Layout:
+Top: Category selector (4 fixed categories as large cards)
+When category selected: Subject folders appear as cards below
+When subject selected: Product grid shows PDFs from that category+subject combo
+Sidebar filters: Type (PDF/Wallpaper), Price (Free/Paid), Sort
+Breadcrumb navigation: Shop > Class 9-10 > Physics
+URL structure: /shop?category=class-9-10&subject=physics&type=pdf&free=false
+
+Homepage (Minor Update)
+Update tagline from CONFIG: 'Educational Resources. Digital Dreams.'
+Categories section shows 4 fixed categories with subject count
+Example: 'Class 9-10: 12 subjects, 150+ PDFs'
+All other homepage sections unchanged (Hero, Featured, Testimonials, etc.)
+
+SECTION 10
+Backend — API Endpoints (UPDATED)
+NEW ENDPOINTS for Subject Management:
+
+UPDATED ENDPOINTS:
+
+Authentication Changes:
+All /admin/* and developer-only routes now check:
+```typescript
+if (req.user.email !== process.env.DEVELOPER_EMAIL) {
+  return res.status(403).json({ error: 'ACCESS_DENIED' });
+}
+```
+Frontend receives user object with email. Frontend code:
+```typescript
+const isAdmin = user?.email === process.env.NEXT_PUBLIC_DEVELOPER_EMAIL;
+// Show/hide admin links based on isAdmin
+```
+NOTE: You must add NEXT_PUBLIC_DEVELOPER_EMAIL to frontend .env.local (same value as backend DEVELOPER_EMAIL)
+
+SECTION 17
+Build Order — Step by Step (UPDATED)
+PHASE 1: Setup
+1. Create GitHub repository 'nightmare'
+2. Create CONFIG.md with all values from Section 01
+3. Create folder structure from Section 04
+4. Setup Supabase project — copy DATABASE_URL and keys
+5. Initialize Next.js 14: npx create-next-app@14 frontend --typescript --tailwind --app
+6. Initialize Express app in /backend with TypeScript
+7. Create .env files. Add DEVELOPER_EMAIL to both backend and frontend (.env.local)
+8. Install all packages from Section 03
+9. Setup Prisma schema from Section 05 — include subjects table
+10. Create migration to seed 4 fixed categories
+11. Run: npx prisma migrate dev
+
+PHASE 2: Backend Core
+1. Build auth endpoints: /auth/register, /auth/login, /auth/logout
+2. Build developerOnly.ts middleware — email check logic
+3. Build subject CRUD endpoints: GET, POST, PUT, DELETE /subjects
+4. Build product CRUD endpoints — update to include subject_id
+5. Setup Cloudinary integration
+6. Setup AWS S3 integration
+7. Test: create subjects via API, upload product with subject_id
+
+PHASE 7: Admin Panel (UPDATED)
+1. Implement developerOnly check on all admin routes
+2. Frontend: check user.email === DEVELOPER_EMAIL to show admin nav
+3. Build Admin Dashboard page
+4. Build Subject Management page (/admin/subjects)
+5. Update Product Management — add subject dropdown
+6. Build Order Management
+7. Build User Management
+8. Build Feedback Center
+9. Test: only developer email can access /admin
+10. Test: create subject, assign PDF to it, verify appears in shop
+
+FINAL NOTES
+This document contains everything needed to build the Nightmare educational marketplace from scratch with the new subject folder system and developer-only admin access. All changeable values (website name, contact info, API keys) are isolated in Section 01 and should be stored in CONFIG.md and .env files for easy future updates.
+
+Contact: sunlight0026@gmail.com | Instagram: @nightmare_ff_26
+nightmare — Build Prompt v3.0 — Subject Folder System
